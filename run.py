@@ -25,7 +25,7 @@ async def fetch(metadata, session):
     md5hash = hashlib.md5()
     try:
         with aiohttp.Timeout(300, loop=session.loop):
-            async with session.get(url) as response:
+            async with session.get(url, timeout=10) as response:
                 last_modified = response.headers.get('Last-Modified', None)
                 if last_modified:
                     return resource_id, url, 1, last_modified
