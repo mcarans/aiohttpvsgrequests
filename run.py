@@ -50,7 +50,7 @@ async def aiohttp_check_resources_for_last_modified(last_modified_check, loop):
     # create instance of Semaphore
     sem = asyncio.Semaphore(100)
 
-    conn = aiohttp.TCPConnector(conn_timeout=10, keepalive_timeout=10, limit=100)
+    conn = aiohttp.TCPConnector(keepalive_timeout=10, limit=100)
     async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
         for metadata in last_modified_check:
             task = asyncio.ensure_future(bound_fetch(sem, metadata, session))
@@ -157,4 +157,4 @@ def main(configuration):
     run_aiohttp(last_modified_check)
 
 if __name__ == '__main__':
-    facade(main, hdx_site='prod')
+    facade(main, hdx_site='prod', hdx_read_only=True)
