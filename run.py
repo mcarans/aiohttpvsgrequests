@@ -53,7 +53,7 @@ async def aiohttp_check_resources_for_last_modified(last_modified_check, loop):
     conn = aiohttp.TCPConnector(keepalive_timeout=10, limit=100)
     async with aiohttp.ClientSession(connector=conn, loop=loop) as session:
         for metadata in last_modified_check:
-            task = asyncio.ensure_future(bound_fetch(sem, metadata, session))
+            task = bound_fetch(sem, metadata, session)
             tasks.append(task)
         return await asyncio.gather(*tasks)
 
@@ -153,7 +153,7 @@ def main(configuration):
             continue
         last_modified_check.append((url, resource_id))
     last_modified_check = sorted(last_modified_check)[:NUMBER_OF_URLS_TO_PROCESS]
-    run_grequests(last_modified_check)
+#    run_grequests(last_modified_check)
     run_aiohttp(last_modified_check)
 
 if __name__ == '__main__':
