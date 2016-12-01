@@ -18,6 +18,8 @@ from requests.adapters import HTTPAdapter
 
 logger = logging.getLogger(__name__)
 
+NUMBER_OF_URLS_TO_PROCESS = 100
+
 async def fetch(metadata, session):
     url, resource_id = metadata
     md5hash = hashlib.md5()
@@ -78,10 +80,7 @@ def grequests_check_resources_for_last_modified(last_modified_check):
             req = grequests.get(metadata[0], timeout=10, session=session, callback=set_metadata(metadata))
             req.metadata = metadata
             reqs.append(req)
-        count = 0
         for response in grequests.imap(reqs, size=100, stream=True, exception_handler=exception_handler):
-            logger.info('Count = %d' % count)
-            count += 1
             url, resource_id = response.metadata
             try:
                 response.raise_for_status()
@@ -146,13 +145,14 @@ def run_grequests(last_modified_check):
 def main(configuration):
     resources = Resource.search_in_hdx(configuration, 'name:')
     last_modified_check = list()
-    for resource in resources[:100]:
+    for resource in resources:
         resource_id = resource['id']
         url = resource['url']
         if 'data.humdata.org' in url or 'manage.hdx.rwlabs.org' in url or 'proxy.hxlstandard.org' in url or \
                 'scraperwiki.com' in url or 'ourairports.com' in url:
             continue
         last_modified_check.append((url, resource_id))
+    last_modified_check = sorted(last_modified_check)[:NUMBER_OF_URLS_TO_PROCESS]
     run_grequests(last_modified_check)
     run_aiohttp(last_modified_check)
 
