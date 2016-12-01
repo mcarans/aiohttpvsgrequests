@@ -78,7 +78,10 @@ def grequests_check_resources_for_last_modified(last_modified_check):
             req = grequests.get(metadata[0], timeout=10, session=session, callback=set_metadata(metadata))
             req.metadata = metadata
             reqs.append(req)
+        count = 0
         for response in grequests.imap(reqs, size=100, stream=True, exception_handler=exception_handler):
+            logger.info('Count = %d' % count)
+            count += 1
             url, resource_id = response.metadata
             try:
                 response.raise_for_status()
@@ -91,6 +94,7 @@ def grequests_check_resources_for_last_modified(last_modified_check):
                 results.append((resource_id, url, 1, last_modified))
                 response.close()
                 continue
+            logger.info('Hashing %s' % url)
             md5hash = hashlib.md5()
             try:
                 for chunk in response.iter_content(chunk_size=1024):
