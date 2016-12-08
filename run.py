@@ -28,6 +28,7 @@ async def fetch(metadata, session):
             async with session.get(url, timeout=10) as response:
                 last_modified = response.headers.get('Last-Modified', None)
                 if last_modified:
+                    response.close()
                     return resource_id, url, 1, last_modified
                 logger.info('Hashing %s' % url)
                 async for chunk in response.content.iter_chunked(1024):
